@@ -1,0 +1,19 @@
+{
+  "name": "samnium",
+  "version": "1.0.0",
+  "description": "A GCF function for a Slack custom action to mail",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delphinus/samnium.git"
+  },
+  "author": "delphinus@remora.cx",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/delphinus/samnium/issues"
+  },
+  "homepage": "https://github.com/delphinus/samnium#readme"
+}
