@@ -1,12 +1,14 @@
 import { Request, Response } from "express"
-import { parseMessage } from "./slack"
+import { saveMessage } from "./dropbox"
+import { parseRequest } from "./slack"
 
-export const samnium = (req: Request, res: Response) => {
+export const samnium = async (req: Request, res: Response) => {
     switch (req.method) {
         case "POST":
             try {
-                process(req, res)
+                await process(req, res)
             } catch (err) {
+                console.error(err)
                 res.status(500).send(err)
             }
             break
@@ -16,6 +18,7 @@ export const samnium = (req: Request, res: Response) => {
     }
 }
 
-const process = (req: Request, res: Response) => {
-    const message = parseMessage(req)
+const process = async (req: Request, res: Response) => {
+    const slackReq = await parseRequest(req)
+    return saveMessage(slackReq.message)
 }
