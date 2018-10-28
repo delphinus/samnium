@@ -11,8 +11,12 @@ export const saveMessage = async (message: SlackMessage) => {
         fetch,
     } as DropboxOptions)
     /* tslint:enable:no-object-literal-type-assertion */
+    const filename = message.text
+        .substring(0, 100)
+        .replace(/[\\\/]/g, ":")
+        .replace(/\s/g, "-")
     return dropbox.filesUpload({
         contents: message.ts,
-        path: `/${message.text.substring(0, 100).replace(/\s/g, "-")}.txt`,
+        path: `/${filename}.txt`,
     })
 }
