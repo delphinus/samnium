@@ -16,6 +16,9 @@ export interface SlackMessage {
 }
 
 export const parseRequest = (req: Request) => {
+    if (!hasRawBody(req)) {
+        throw new Error("this request has no raw body")
+    }
     mustAuth(req)
     const decoded = JSON.parse(req.body.payload)
     if (isSlackRequest(decoded)) {
@@ -27,9 +30,9 @@ export const parseRequest = (req: Request) => {
 export const response = async (slackReq: SlackRequest) =>
     fetch(slackReq.response_url, { method: "POST" })
 
-const mustAuth = (req: Request) => {
+const mustAuth = (req: ReqWithRawBody) => {
     const timestamp = getTimestamp(req)
-    const sigBase = `v0:${timestamp}:${req.body}`
+    const sigBase = `v0:${timestamp}:${req.rawBody.toString("utf-8")}`
     const hash = createHmac("sha256", slackSigningSecret)
         .update(sigBase)
         .digest("hex")
@@ -68,3 +71,10 @@ const isMessage = (value: any): value is SlackMessage => {
 
 const isObject = (value: any): value is object =>
     value !== null && value !== undefined && Object(value) === value
+
+interface ReqWithRawBody extends Request {
+    rawBody: Buffer
+}
+
+const hasRawBody = (req: Request): req is ReqWithRawBody =>
+    Buffer.isBuffer((req as any).rawBody)
