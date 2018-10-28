@@ -2,8 +2,9 @@
   "name": "samnium",
   "version": "1.0.0",
   "description": "A GCF function for a Slack custom action to mail",
-  "main": "index.js",
+  "main": "./index.js",
   "scripts": {
+    "build": "rm -fr dist && tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
