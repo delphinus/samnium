@@ -7,6 +7,7 @@ export const samnium = async (req: Request, res: Response) => {
         case "POST":
             try {
                 await process(req, res)
+                res.status(200).send("ok")
             } catch (err) {
                 console.error(err)
                 res.status(500).send(err)
