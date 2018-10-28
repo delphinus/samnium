@@ -4,6 +4,10 @@ import fetch from "isomorphic-fetch"
 import { stringify } from "querystring"
 import { slackAccessToken, slackSigningSecret } from "./secrets.json"
 
+if (typeof Symbol.asyncIterator === "undefined") {
+    ;(Symbol as any).asyncIterator = Symbol.for("asyncIterator")
+}
+
 interface SlackRequest {
     response_url: string
     message: SlackMessage
@@ -44,16 +48,18 @@ export const responseToChannel = async (slackReq: SlackRequest) =>
 const userRe = /<@(\w+)>/g
 
 export const translateMentions = async (text: string) => {
-    const promises: Promise<string>[] = []
-    while (userRe.exec(text)) {
-        promises.push(fetchName(RegExp.$1))
+    const names: string[] = []
+    for await (const name of fetchNames(text)) {
+        names.push(name)
     }
-    if (!promises.length) {
-        return text
-    }
-    const names = await Promise.all(promises)
     let count = 0
     return text.replace(userRe, () => `@${names[count++]}`)
+}
+
+function* fetchNames(text: string): AsyncIterableIterator<string> {
+    while (userRe.exec(text)) {
+        yield fetchName(RegExp.$1)
+    }
 }
 
 type usersInfoResult =
