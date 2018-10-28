@@ -1,6 +1,7 @@
 import { createHmac } from "crypto"
 import { Request, Response } from "express"
 import fetch from "isomorphic-fetch"
+import { stringify } from "querystring"
 import { slackAccessToken, slackSigningSecret } from "./secrets.json"
 
 interface SlackRequest {
@@ -39,6 +40,46 @@ export const responseToChannel = async (slackReq: SlackRequest) =>
         },
         method: "POST",
     })
+
+const userRe = /<@(\w+)>/g
+
+export const translateMentions = async (text: string) => {
+    const promises: Promise<string>[] = []
+    while (userRe.exec(text)) {
+        promises.push(fetchRealName(RegExp.$1))
+    }
+    if (!promises.length) {
+        return text
+    }
+    const realNames = await Promise.all(promises)
+    let count = 0
+    return text.replace(userRe, () => `@${realNames[count++]}`)
+}
+
+type usersInfoResult =
+    | { ok: false; error: string }
+    | { ok: true; user: { name: string } }
+
+const fetchRealName = async (user: string) => {
+    const result = await fetch("https://slack.com/api/users.info", {
+        body: stringify({
+            token: slackAccessToken,
+            user,
+        }),
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+    })
+    if (!result.ok || !result.body) {
+        return ""
+    }
+    const json = (await result.json()) as usersInfoResult
+    if (json.ok) {
+        return json.user.name
+    }
+    throw new Error(`Slack returned error: ${json.error}`)
+}
 
 const mustAuth = (req: ReqWithRawBody) => {
     const timestamp = getTimestamp(req)
