@@ -46,21 +46,21 @@ const userRe = /<@(\w+)>/g
 export const translateMentions = async (text: string) => {
     const promises: Promise<string>[] = []
     while (userRe.exec(text)) {
-        promises.push(fetchRealName(RegExp.$1))
+        promises.push(fetchName(RegExp.$1))
     }
     if (!promises.length) {
         return text
     }
-    const realNames = await Promise.all(promises)
+    const names = await Promise.all(promises)
     let count = 0
-    return text.replace(userRe, () => `@${realNames[count++]}`)
+    return text.replace(userRe, () => `@${names[count++]}`)
 }
 
 type usersInfoResult =
     | { ok: false; error: string }
     | { ok: true; user: { name: string } }
 
-const fetchRealName = async (user: string) => {
+const fetchName = async (user: string) => {
     const result = await fetch("https://slack.com/api/users.info", {
         body: stringify({
             token: slackAccessToken,
