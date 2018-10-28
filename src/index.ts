@@ -1,6 +1,6 @@
 import { Request, Response } from "express"
 import { saveMessage } from "./dropbox"
-import { parseRequest } from "./slack"
+import { parseRequest, responseToChannel } from "./slack"
 
 export const samnium = async (req: Request, res: Response) => {
     switch (req.method) {
@@ -20,5 +20,6 @@ export const samnium = async (req: Request, res: Response) => {
 
 const process = async (req: Request, res: Response) => {
     const slackReq = await parseRequest(req)
-    return saveMessage(slackReq.message)
+    await saveMessage(slackReq.message)
+    return responseToChannel(slackReq)
 }

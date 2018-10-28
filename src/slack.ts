@@ -1,7 +1,7 @@
 import { createHmac } from "crypto"
 import { Request, Response } from "express"
 import fetch from "isomorphic-fetch"
-import { slackSigningSecret } from "./secrets.json"
+import { slackAccessToken, slackSigningSecret } from "./secrets.json"
 
 interface SlackRequest {
     response_url: string
@@ -27,8 +27,18 @@ export const parseRequest = (req: Request) => {
     throw new Error("invalid payload")
 }
 
-export const response = async (slackReq: SlackRequest) =>
-    fetch(slackReq.response_url, { method: "POST" })
+export const responseToChannel = async (slackReq: SlackRequest) =>
+    fetch(slackReq.response_url, {
+        body: JSON.stringify({
+            response_type: "ephemeral",
+            text: "Successfully added the text to iOS Reminders",
+        }),
+        headers: {
+            Authorization: `Bearer ${slackAccessToken}`,
+            "Content-Type": "application/json",
+        },
+        method: "POST",
+    })
 
 const mustAuth = (req: ReqWithRawBody) => {
     const timestamp = getTimestamp(req)
