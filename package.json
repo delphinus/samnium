@@ -2,9 +2,11 @@
   "name": "samnium",
   "version": "1.0.0",
   "description": "A GCF function for a Slack custom action to mail",
-  "main": "./index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "rm -fr dist && tsc",
+    "predeploy": "npm run build",
+    "deploy": "gcloud beta functions deploy samnium --trigger-http",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
