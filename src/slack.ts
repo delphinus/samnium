@@ -56,7 +56,7 @@ export const translateMentions = async (text: string) => {
     return text.replace(userRe, () => `@${names[count++]}`)
 }
 
-function* fetchNames(text: string): AsyncIterableIterator<string> {
+async function* fetchNames(text: string) {
     while (userRe.exec(text)) {
         yield fetchName(RegExp.$1)
     }
